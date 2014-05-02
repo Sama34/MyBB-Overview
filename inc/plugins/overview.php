@@ -34,6 +34,19 @@ global $settings;
 
 if(!$settings['overview_noindex'])
 {
+	global $templatelist;
+
+	if(!isset($templatelist))
+	{
+		$templatelist = '';
+	}
+	else
+	{
+		$templatelist .= ',';
+	}
+
+	$templatelist .= 'overview, overview_2_columns, overview_2_columns_row, overview_3_columns, overview_3_columns_row, overview_message';
+
     $plugins->add_hook("index_start", "overview");
     $plugins->add_hook("index_end", "overview_end");
 }
@@ -603,6 +616,7 @@ function overview()
 
         // Load language files
         $lang->load("overview");
+		isset($templates->cache['overview']) or $templates->cache('overview, overview_2_columns, overview_2_columns_row, overview_3_columns, overview_3_columns_row, overview_message');
 
         // Exclude unviewable forums
         $overview_unviewwhere = "";
@@ -610,6 +624,11 @@ function overview()
         if($overview_unviewable)
         {
             $overview_unviewwhere = "AND fid NOT IN ({$overview_unviewable})";
+        }
+        $inactiveforums = get_inactive_forums();
+        if($inactiveforums)
+        {
+            $overview_unviewwhere .= "AND fid NOT IN ({$inactiveforums})";
         }
 		
 		// Check group permissions if we can't view threads not started by us
@@ -1180,8 +1199,7 @@ function overview_parsesubject($subject, $icon=0, $prefix=0, $tid=0, $pid=0, $ei
 
         if(!isset($overview_prefixcache[$prefix]))
         {
-            $query = $db->simple_select('threadprefixes', 'displaystyle', "pid='$prefix'");
-            $row = $db->fetch_array($query);
+			$row = build_prefixes($prefix);
 
             if($row)
             {
@@ -1202,7 +1220,7 @@ function overview_parsesubject($subject, $icon=0, $prefix=0, $tid=0, $pid=0, $ei
         $prefix = '';
     }
 
-    return "{$icon}{$prefix}<a href=\"{$link}\" title=\"{$subjectfull}\">{$subject}</a>";
+    return "{$icon}{$prefix}<a href=\"{$settings['bburl']}/{$link}\" title=\"{$subjectfull}\">{$subject}</a>";
 }
 
 function overview_parseuser($uid, $username, $usergroup=0, $displaygroup=0)
