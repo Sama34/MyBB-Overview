@@ -653,6 +653,18 @@ function overview()
 			}
 		}
 
+		/*START: No Search Forum Exclusion Plugin*/
+		$array = array();
+
+		foreach(array('getnew', 'getdaily', 'findguest', 'finduser', 'finduserthreads') as $key)
+		{
+			if(!empty($settings['nosearch_'.$key]))
+			{
+				$overview_unviewwhere .= " AND fid NOT IN (".$settings['nosearch_'.$key].")";
+			}
+		}
+		/*END: No Search Forum Exclusion Plugin*/
+
         // Define variables
         $overview_content = "";
         $trow_message = "";
