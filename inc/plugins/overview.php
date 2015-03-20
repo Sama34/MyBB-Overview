@@ -654,14 +654,11 @@ function overview()
 		}
 
 		/*START: No Search Forum Exclusion Plugin*/
-		$array = array();
-
-		foreach(array('getnew', 'getdaily', 'findguest', 'finduser', 'finduserthreads') as $key)
+		if(function_exists('nosearch_update_query_cache'))
 		{
-			if(!empty($settings['nosearch_'.$key]))
-			{
-				$overview_unviewwhere .= " AND fid NOT IN (".$settings['nosearch_'.$key].")";
-			}
+			global $searcharray;
+			nosearch_update_query_cache('');
+			$overview_unviewwhere .= $searcharray['querycache'];
 		}
 		/*END: No Search Forum Exclusion Plugin*/
 
